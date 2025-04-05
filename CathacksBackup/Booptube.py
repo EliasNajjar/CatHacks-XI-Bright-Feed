@@ -55,8 +55,8 @@ def flagposts(sentences, confidence_threshold=0.5):
     
     
     for sentence in sentences:
-        result = q_predict(sentence, q_table, vectorizer)
-        print(result)
+        result = q_predict(sentences, q_table, vectorizer)
+        
         '''
         # Ensure the confidence is a float or handle it as needed
         try:
@@ -76,7 +76,7 @@ q_table, vectorizer = load_q_learning_model()
 def main():
     url = arg1
     video_id = get_video_id(url)
-    
+   
     from youtube_transcript_api import YouTubeTranscriptApi
     transcript_list = YouTubeTranscriptApi.get_transcript(video_id)    
     print("Evaluating Transcript")
@@ -84,7 +84,8 @@ def main():
     transcript_text = " ".join(entry["text"] for entry in transcript_list)
     # Split the transcript into sentences
     sentences = split_into_sentences(transcript_text)
-    
+    result = q_predict(sentences, q_table, vectorizer)
+    print(result)
     # Flag posts based on the transcript sentences
     flagged_possible, flagged_certain = flagposts(sentences)
     
