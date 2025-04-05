@@ -85,13 +85,16 @@ def main():
     # Split the transcript into sentences
     sentences = split_into_sentences(transcript_text)
     result = q_predict(transcript_text, q_table, vectorizer)
-    print(result)
+    
+
+
     # Flag posts based on the transcript sentences
     flagged_possible, flagged_certain = flagposts(sentences, result)
     
     # Writing results to a response file
     with open(f"response-{current_pid}", "w") as file:
         responselength = 1000
+        
         if len(flagged_certain) >= 5:
             i = 1
             file.write("Here are some concerning phrases we found!")
@@ -105,6 +108,7 @@ def main():
                 file.write(post[:responselength])
         elif len(flagged_possible) > 0:
             i = 1
+            file.write("Here are some slightly concerning phrases we found!\n")
             while(i <= len(flagged_possible) and i <= 5):
                 file.write(f"Phrase{i}\n")
                 file.write(f"{flagged_possible[i-1][:responselength]}\n")
