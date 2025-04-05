@@ -30,7 +30,7 @@ flagged_comments_possible, flagged_comments_certain =[],[]
 def scrapecomments(subredname):
     scrapedcomments = []
     subred = reddit.subreddit(subredname)
-    for submission in subred.hot(limit=1):  # Just take one post for demo
+    for submission in subred.hot(limit=10):  # Just take one post for demo
         # Load all comments (replace MoreComments objects)
         
             submission.comments.replace_more(limit=10)
@@ -99,7 +99,7 @@ reddit = praw.Reddit(
     client_secret = client_secret,
     user_agent = user_agent,
     )
-subredname = "learnpython"
+subredname = "UniversityOfKentucky"
 
 #initialize the model
 q_table, vectorizer = load_q_learning_model()
@@ -113,33 +113,52 @@ if validatesubred(subredname) == True:
     flagged_comments_possible, flagged_comments_certain =[],[]
     #functions to filter our posts and shit
     posts = scrapecontent(subredname)
-    comments = scrapecontent(subredname)
+    comments = scrapecomments(subredname)
     flagged_posts_possible, flagged_posts_certain = flagposts(posts)
     flagged_comments_possible, flagged_comments_certain = flagcomments(comments)
     current_pid = os.getpid()
-    
-    with open(f"response-{current_pid}", "w") as file:
-     responselength = 1000
+    #writing to the output file
+    with open(f"response-{current_pid}", "w",encoding = "utf-8") as file:
+     responselength = 700
      if len(flagged_posts_certain) >= 5:
         i = 1
-        file.write("Here are some concerning posts we found!")
+        file.write("Here are some concerning posts we found!\n")
         while(i<=5):
-            file.write(f"Post{i}\n")
+            file.write(f"\nPost{i}\n\n")
             file.write(f"{flagged_posts_certain[i][:responselength]}\n")
             i += 1
-
      elif len(flagged_posts_certain) > 0:
+         file.write("Here are some concerning posts we found!\n")
          for i,posts in enumerate(flagged_posts_certain):
-            file.write(f"Post{i}\n")
-            file.write(posts[:responselength])
+            file.write(f"\nPost{i}\n\n")
+            file.write(f"{posts[:responselength]}\n")
      elif len(flagged_posts_possible) >= 5:
          i = 1
-         while(i<=5):
-            file.write(f"Post{i}\n")
+         file.write("Here are some slightly concerning posts we found!\n")
+         while(i<=5):           
+            file.write(f"\nPost{i}\n\n")
             file.write(f"{flagged_posts_possible[i][:responselength]}\n")
             i += 1
      else:
          file.write("We found nothing concerning in the subreddit's posts")
+     # commentlength = 100
+     # if(len(flagged_comments_certain) > 0):
+        
+     #    file.write("Also here are some concering comments\n")
+     #    for i,comment in enumerate(flagged_comments_certain):
+     #        file.write(f"\nComment{i+1}\n\n")
+     #        file.write(comment[commentlength])
+     #        if (i>3):
+     #            break
+     # elif(len(flagged_comments_possible) > 0):
+     #    file.write("Also here are some slightly concering comments\n")
+     #    for i,comment in enumerate(flagged_comments_possible):
+     #        file.write(f"\nComment{i+1}\n\n")
+     #        file.write(comment[commentlength])
+     #        if (i>3):
+     #            break
+
+
 
     
 
