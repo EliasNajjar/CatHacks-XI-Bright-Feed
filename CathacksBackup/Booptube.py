@@ -9,7 +9,8 @@ from BullyingAdultContentAnalyzer import q_predict, load_q_learning_model
 from youtube_transcript_api import YouTubeTranscriptApi
 import re
 
-# Get arguments from the command line
+#Get arguments from the command line
+
 arguments = sys.argv
 current_pid = os.getpid()
 if len(arguments) > 2:
@@ -49,10 +50,10 @@ def get_video_id(url):
     return None
 
 # Function to flag posts based on content analysis with a confidence threshold
-def flagposts(transcript_text, confidence_threshold=0.5):
+def flagposts(sentences, confidence_threshold=0.5):
     flagged_possible, flagged_certain = [], []
     
-    for x in transcript_text:
+    for x in sentences:
         result = q_predict(x, q_table, vectorizer)
         
         # Ensure the confidence is a float or handle it as needed
@@ -87,14 +88,16 @@ def clean_and_split_into_sentences(text):
 def main():
     url = arg1
     video_id = get_video_id(url)
-
+    print(video_id)
+    print("Getting Video Transcript")
     # Fetch transcript using YouTubeTranscriptApi
     transcript_list = YouTubeTranscriptApi.get_transcript(video_id)    
     transcript_text = " ".join(entry["text"] for entry in transcript_list)
 
     # Clean and split the transcript into sentences
     sentences = clean_and_split_into_sentences(transcript_text)
-
+    
+    print("Evaluating Transcript")
     # Flag posts based on content analysis with a 50% confidence threshold
     flagged_possible, flagged_certain = flagposts(sentences, confidence_threshold=0.5)
 
