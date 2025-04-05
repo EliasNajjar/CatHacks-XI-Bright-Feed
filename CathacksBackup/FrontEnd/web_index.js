@@ -26,7 +26,7 @@ async function check() {
     document.getElementById("AI Output").innerText = latestResponse;
     await sleep(100);
   }
-  while ((latestResponse != "SENDING DATA" && !latestResponse.includes("close") && !latestResponse.includes("error") && !latestResponseFinished))
+  while ((!latestResponse.includes("close") && !latestResponse.includes("error") && !latestResponseFinished))
   endSession();
 };
 
@@ -46,13 +46,13 @@ function endSession() {
 
 async function startSession() {
   latestResponseFinished = false;
-  const response = await fetch(`${HOSTNAME}/subreddit`, {
+  const response = await fetch(`${HOSTNAME}/post`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      subReddit: getInput(),
+      site: getInput(),
       detectionType: document.getElementById("to-check-for").value,
     }),
   });
