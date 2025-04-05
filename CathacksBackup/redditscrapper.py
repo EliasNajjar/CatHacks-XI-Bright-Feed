@@ -14,12 +14,14 @@ import numpy as np
 from praw.models.reddit.subreddit import Redirect
 from prawcore import Forbidden
 from BullyingAdultContentAnalyzer import q_predict,load_q_learning_model
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
+import torch
 
 #talking to the node
 arguments = sys.argv
 if len(arguments) > 2:
-    arg1 = arguments[1]  # Fixed typo
-    arg2 = arguments[2]  # Fixed typo
+    arg1 = arguments[1]  # reddit name
+    arg2 = arguments[2]  # what we are looking for
 
     print(arg1)
     print(arg2)
@@ -43,7 +45,7 @@ def scrapecontent(subredname):
     subred = reddit.subreddit(subredname)
     postcontent = []
     #get top 10 posts
-    for post in subred.hot(limit = 10):
+    for post in subred.hot(limit = 20):
         #write it all into one file
         
             if post.selftext:
@@ -80,8 +82,7 @@ def validatesubred(subreddit):
         print("validated")
         return True
     except (NOT_FOUND, Forbidden, Redirect) as e:
-        
-        return False,
+        return False
 
 #tesing the model output
 # for posts in posts:
@@ -92,71 +93,126 @@ def validatesubred(subreddit):
 client_id = "G0gqyUzguU7lmP3D7JUcvw"
 client_secret = "iSXaeSblUp7uaGgHHxVvWMzfmrhVNg"
 user_agent = "tesingapi"
-
+limit = 10
+current_pid = os.getpid()
 #initialize reddit object
 reddit = praw.Reddit(
     client_id = client_id,
     client_secret = client_secret,
     user_agent = user_agent,
     )
-subredname = "UniversityOfKentucky"
+
 
 #initialize the model
 q_table, vectorizer = load_q_learning_model()
 
+#talking to the node
+arguments = sys.argv
+subredname = ""
+if len(arguments) > 2:
+    subredname = arguments[1]  # reddit name
+    arg2 = arguments[2]  # what we are looking for
+
+    print(arg1)
+    print(arg2)
+#initialed flagged variables
 
 if validatesubred(subredname) == True:
-    #scrape website content
-    comments = scrapecomments(subredname)
-    posts = scrapecontent(subredname)
-    flagged_posts_possible, flagged_posts_certain = [],[]
-    flagged_comments_possible, flagged_comments_certain =[],[]
-    #functions to filter our posts and shit
-    posts = scrapecontent(subredname)
-    comments = scrapecomments(subredname)
-    flagged_posts_possible, flagged_posts_certain = flagposts(posts)
-    flagged_comments_possible, flagged_comments_certain = flagcomments(comments)
-    current_pid = os.getpid()
-    #writing to the output file
-    with open(f"response-{current_pid}", "w",encoding = "utf-8") as file:
-     responselength = 700
-     if len(flagged_posts_certain) >= 5:
-        i = 1
-        file.write("Here are some concerning posts we found!\n")
-        while(i<=5):
-            file.write(f"\nPost{i}\n\n")
-            file.write(f"{flagged_posts_certain[i][:responselength]}\n")
+    if (arg2 == "AI Generated content"):
+        model_name = "Juner/AI-generated-text-detection-pair"
+        model = AutoModelForSequenceClassification.from_pretrained(model_name)
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        posts = scrapecontent(subredname)
+        i = 0
+        aicheck = 0
+        print("AI is processing")
+        for input in posts:
+            input_text = input
+            inputs = tokenizer(  
+            input_text,
+            return_tensors="pt",
+            truncation=True,
+            max_length=512,
+            padding="max_length"
+            )
             i += 1
-     elif len(flagged_posts_certain) > 0:
-         file.write("Here are some concerning posts we found!\n")
-         for i,posts in enumerate(flagged_posts_certain):
-            file.write(f"\nPost{i}\n\n")
-            file.write(f"{posts[:responselength]}\n")
-     elif len(flagged_posts_possible) >= 5:
-         i = 1
-         file.write("Here are some slightly concerning posts we found!\n")
-         while(i<=5):           
-            file.write(f"\nPost{i}\n\n")
-            file.write(f"{flagged_posts_possible[i][:responselength]}\n")
-            i += 1
-     else:
-         file.write("We found nothing concerning in the subreddit's posts")
-     # commentlength = 100
-     # if(len(flagged_comments_certain) > 0):
+            with torch.no_grad():
+                outputs = model(**inputs)
+
+                # Get predictions
+                predictions = torch.argmax(outputs.logits, dim=1)
+
+                # Interpret the prediction
+                label_map = {0: "Human-written", 1: "AI-generated"}
+                output = label_map[predictions.item()]
+                if (output == "AI-generated"):
+                    aicheck += 1
+                else:
+                    aicheck -= 1
+
+                if (i > limit):
+                    break
+        ai_average = aicheck/i
+        print("writing the file")
+        with open(f"response-{current_pid}", "w",encoding = "utf-8") as file:
+            if (ai_average > 0.5):
+            
+                file.write("We believe there is a considerable amount of AI generated content on the page")
+            else:
+                file.write("We believe there is not a considerable amount of AI generated content on the page")
+    else:
+        print("Scrapping Content")
+        #scrape website content
+        comments = scrapecomments(subredname)
+        posts = scrapecontent(subredname)
+        flagged_posts_possible, flagged_posts_certain = [],[]
+        flagged_comments_possible, flagged_comments_certain =[],[]
+        #functions to filter our posts and shit
+        posts = scrapecontent(subredname)
+        comments = scrapecomments(subredname)
+        flagged_posts_possible, flagged_posts_certain = flagposts(posts)
+        flagged_comments_possible, flagged_comments_certain = flagcomments(comments)
         
-     #    file.write("Also here are some concering comments\n")
-     #    for i,comment in enumerate(flagged_comments_certain):
-     #        file.write(f"\nComment{i+1}\n\n")
-     #        file.write(comment[commentlength])
-     #        if (i>3):
-     #            break
-     # elif(len(flagged_comments_possible) > 0):
-     #    file.write("Also here are some slightly concering comments\n")
-     #    for i,comment in enumerate(flagged_comments_possible):
-     #        file.write(f"\nComment{i+1}\n\n")
-     #        file.write(comment[commentlength])
-     #        if (i>3):
-     #            break
+        #writing to the output file
+        with open(f"response-{current_pid}", "w",encoding = "utf-8") as file:
+         responselength = 700
+         if len(flagged_posts_certain) >= 5:
+            i = 1
+            file.write("Here are some concerning posts we found!\n")
+            while(i<=5):
+                file.write(f"\nPost{i}\n\n")
+                file.write(f"{flagged_posts_certain[i][:responselength]}\n")
+                i += 1
+         elif len(flagged_posts_certain) > 0:
+             file.write("Here are some concerning posts we found!\n")
+             for i,posts in enumerate(flagged_posts_certain):
+                file.write(f"\nPost{i-1}\n\n")
+                file.write(f"{posts[:responselength]}\n")
+         elif len(flagged_posts_possible) >= 5:
+             i = 1
+             file.write("Here are some slightly concerning posts we found!\n")
+             while(i<=5):           
+                file.write(f"\nPost{i}\n\n")
+                file.write(f"{flagged_posts_possible[i][:responselength]}\n")
+                i += 1
+         else:
+             file.write("We found nothing concerning in the subreddit's posts")
+         commentlength = 100
+         if(len(flagged_comments_certain) > 0):
+        
+            file.write("Also here are some concering comments\n")
+            for i,comment in enumerate(flagged_comments_certain):
+                file.write(f"\nComment{i+1}\n\n")
+                file.write(comment[:commentlength])
+                if (i>3):
+                    break
+         elif(len(flagged_comments_possible) > 0):
+            file.write("Also here are some slightly concering comments\n")
+            for i,comment in enumerate(flagged_comments_possible):
+                file.write(f"\nComment{i+1}\n\n")
+                file.write(comment[:commentlength])
+                if (i>3):
+                    break
 
 
 
