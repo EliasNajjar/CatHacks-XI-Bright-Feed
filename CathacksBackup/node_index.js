@@ -27,7 +27,6 @@ function runPythonScript(scriptPath, subReddit) { //arguments: url, username, pa
 
   const Session = {
     spawn: Process,
-    data: subReddit,
     state: "started",
     id: Process.pid
   }
@@ -60,11 +59,7 @@ app.get('/', (req, res) => {
 
 
 app.post('/subreddit', function (req, res) {
-    console.log("URL Received!")
-  
     let id = runPythonScript(PYTHON_FILE, req.body);
-
-    console.log(`Session id: ${id}`);
 
     res.send(id.toString());
 })
