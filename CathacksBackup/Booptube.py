@@ -95,9 +95,9 @@ def main():
         if len(flagged_certain) >= 5:
             i = 1
             file.write("Here are some concerning phrases we found!")
-            while(i <= 5):
+            while(i <= len(flagged_certain) and i <= 5):
                 file.write(f"Phrase{i}\n")
-                file.write(f"{flagged_certain[i][:responselength]}\n")
+                file.write(f"{flagged_certain[i-1][:responselength]}\n")
                 i += 1
         elif len(flagged_certain) > 0:
             for i, post in enumerate(flagged_certain):
@@ -105,9 +105,9 @@ def main():
                 file.write(post[:responselength])
         elif len(flagged_possible) > 0:
             i = 1
-            while(i <= 5):
+            while(i <= len(flagged_possible) and i <= 5):
                 file.write(f"Phrase{i}\n")
-                file.write(f"{flagged_possible[i][:responselength]}\n")
+                file.write(f"{flagged_possible[i-1][:responselength]}\n")
                 i += 1
         else:
             file.write("We found nothing concerning in the video transcript")
