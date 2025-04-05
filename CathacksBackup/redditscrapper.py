@@ -7,6 +7,67 @@ import praw
 import subprocess
 import sys
 import os
+import os
+import joblib
+import pandas as pd
+import numpy as np
+from BullyingAdultContentAnalyzer import q_predict,load_q_learning_model
+
+
+# All of the functions
+def scrapecomments(subredname):
+    scrapedcomments = []
+    subred = reddit.subreddit(subredname)
+    for submission in subred.hot(limit=1):  # Just take one post for demo
+        # Load all comments (replace MoreComments objects)
+        
+            submission.comments.replace_more(limit=10)
+            comments = submission.comments.list()
+            # Iterate through top-level comments
+            comment_list = [comment.body for comment in submission.comments.list()]
+    return comment_list
+
+def scrapecontent(subredname):
+    subred = reddit.subreddit(subredname)
+    postcontent = []
+    #get top 10 posts
+    for post in subred.hot(limit = 10):
+        #write it all into one file
+        
+            if post.selftext:
+                
+                postcontent.append(post.selftext)
+            else:
+                postcontent.append("No text available")
+    return postcontent
+
+def flagposts(posts):
+ for x in posts:
+    result = q_predict(x,q_table,vectorizer)
+    if result['top_class'] != 'neutral':
+        if result['top_class'] == 'strongly inappropriate':
+            flagged_posts_certain.append(x)
+        else:
+            flagged_posts_possible.append(x)   
+ return flagged_posts_possible, flagged_posts_certain
+
+def flagcomments(comments):
+ for x in comments:
+    result = q_predict(x,q_table,vectorizer)
+    if result['top_class'] != 'neutral':
+        if result['top_class'] == 'strongly inappropriate':
+            flagged_comments_certain.append(x)
+        else:
+            flagged_comments_possible.append(x)   
+ return flagged_comments_possible, flagged_comments_certain
+
+#tesing the model output
+# for posts in posts:
+#     result = q_predict(posts,q_table,vectorizer)
+#     print(f"\n Prediction: {result['top_class']} (Confidence: {result['confidence']} | Margin: {result['margin']:.4f})")
+#     print()
+
+#initializing the reddit api
 client_id = "G0gqyUzguU7lmP3D7JUcvw"
 client_secret = "iSXaeSblUp7uaGgHHxVvWMzfmrhVNg"
 user_agent = "tesingapi"
@@ -18,74 +79,20 @@ reddit = praw.Reddit(
     user_agent = user_agent,
     )
 subredname = "learnpython"
-'''
-def getargs():
-    for i,argument in enumerate(sys.arg):
-        print(f"{i} argument is {argument}")
-'''
-    
-# save as a textfile
-def scrapecomments(subredname):
-    subred = reddit.subreddit(subredname)
-    for submission in subred.hot(limit=1):  # Just take one post for demo
-        # Load all comments (replace MoreComments objects)
-        filename = f"content.txt"
-        with open(filename,"a",encoding = "utf-8") as f:
-            submission.comments.replace_more(limit=10)
-            comments = submission.comments.list()
-            # Iterate through top-level comments
-            for idx, comment in enumerate(submission.comments.list()):
-                f.write(f"{idx + 1}. {comment.body}\n")
 
-def scrapecontent(subredname):
-    subred = reddit.subreddit(subredname)
-    #get t0p 10 posts
-    for post in subred.hot(limit = 10):
-        #write it all into one file
-        filename = f"content.txt"
-        with open(filename,"a",encoding = "utf-8") as f:
-            if post.selftext:
-                f.write(f"{post.author} wrote \n {post.selftext}\n")
-            else:
-                f.write("No text body")
-#getargs()
 
-with open("content.txt","w",encoding = "utf-8") as file:
-    pass
-scrapecomments(subredname)
-scrapecontent(subredname)
-with open("content.txt","r",encoding = "utf-8") as file:
-    file_content = file.read()
-    contentToRecognize = "topics of hate speech"
-    '''
-    # Customize this part: lines 61-77 written by ChatGPT with changes
-    model = "llama3.2"
-    system_message = "Talk like a pirate."
-    user_prompt = f"Determine if the text \"{file_content}\" contains {contentToRecognize}"
+q_table, vectorizer = load_q_learning_model()
 
-    # Build the command
-    cmd = [
-        "ollama", "run", "llama3.2",
-    ]
+comments = scrapecomments(subredname)
+posts = scrapecontent(subredname)
+flagged_posts_possible, flagged_posts_certain = [],[]
+flagged_comments_possible, flagged_comments_certain =[],[]
+#functions to filter our posts and shit
 
-    prompt = f"Determine if the text \"{file_content}\" contains {contentToRecognize}"
+posts = scrapecontent(subredname)
+comments = scrapecontent(subredname)
+flagged_posts_possible, flagged_posts_certain = flagposts(posts)
+flagged_comments_possible, flagged_comments_certain = flagcomments(comments)
 
-    result = subprocess.run(cmd, input=prompt, capture_output=True, text=True)
-    print(result.stdout)
-    '''
-    result = subprocess.run(["ollama", "chat", "llama3.2", "--system", "You are a pirate", "--prompt", f"Determine if the text \"{file_content}\" contains {contentToRecognize}"], capture_output=True, text=True)
-    print(result.stdout)
-    '''
-    response = ollama.chat(model='llama3.2', messages=[
-        {
-            'role': 'system',
-            'content': 'Talk like a priate',
-        },
-        {
-            'role': 'user',
-            'content': f'Determine if the text \"{file_content}\" contains {contentToRecognize}',
-        },
-    ])
-    '''
-    #output = ollama.generate(model="llama3.2",prompt=f"Determine if the text \"{file_content}\" contains {contentToRecognize}")
-    
+
+
