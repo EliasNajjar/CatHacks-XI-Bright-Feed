@@ -55,7 +55,7 @@ def flagposts(sentences, confidence_threshold=0.5):
     
     for x in sentences:
         result = q_predict(x, q_table, vectorizer)
-        
+        print(result)
         # Ensure the confidence is a float or handle it as needed
         try:
             confidence = float(result.get('confidence', 0))  # Default to 0 if no confidence value
