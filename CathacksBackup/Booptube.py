@@ -50,12 +50,12 @@ def split_into_sentences(text):
     return nltk.sent_tokenize(text)
 
 # Function to flag posts based on content analysis with a confidence threshold
-def flagposts(sentences, confidence_threshold=0.5):
+def flagposts(sentences, result, confidence_threshold=0.5):
     flagged_possible, flagged_certain = [], []
     
     
     for sentence in sentences:
-        result = q_predict(sentences, q_table, vectorizer)
+        
         
         '''
         # Ensure the confidence is a float or handle it as needed
@@ -84,10 +84,10 @@ def main():
     transcript_text = " ".join(entry["text"] for entry in transcript_list)
     # Split the transcript into sentences
     sentences = split_into_sentences(transcript_text)
-    #result = q_predict(sentences, q_table, vectorizer)
-    #print(result)
+    result = q_predict(transcript_text, q_table, vectorizer)
+    print(result)
     # Flag posts based on the transcript sentences
-    flagged_possible, flagged_certain = flagposts(sentences)
+    flagged_possible, flagged_certain = flagposts(sentences, result)
     
     # Writing results to a response file
     with open(f"response-{current_pid}", "w") as file:
