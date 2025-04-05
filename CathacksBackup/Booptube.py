@@ -84,8 +84,8 @@ def main():
     transcript_text = " ".join(entry["text"] for entry in transcript_list)
     # Split the transcript into sentences
     sentences = split_into_sentences(transcript_text)
-    result = q_predict(sentences, q_table, vectorizer)
-    print(result)
+    #result = q_predict(sentences, q_table, vectorizer)
+    #print(result)
     # Flag posts based on the transcript sentences
     flagged_possible, flagged_certain = flagposts(sentences)
     
