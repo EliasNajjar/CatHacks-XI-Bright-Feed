@@ -137,7 +137,7 @@ if validatesubred(subredname) == True:
             predictions = torch.argmax(outputs.logits, dim=1)
 
             # Interpret the prediction
-            label_map = {0: "Human-written", 1: "AI-generated", 2: "Human-written", 3: "Human-written"}
+            label_map = {0: "Human-written", 1: "AI-generated", 2: "Human-written", 3: "AI-generated"}
             output = label_map[predictions.item()]
             if (output == "AI-generated"):
                 aicheck += 1
