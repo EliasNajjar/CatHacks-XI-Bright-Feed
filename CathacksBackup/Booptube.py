@@ -8,9 +8,6 @@ from urllib.parse import urlparse, parse_qs
 from BullyingAdultContentAnalyzer import q_predict, load_q_learning_model
 import nltk
 
-# Ensure the nltk tokenizer is available
-nltk.download('punkt')
-
 arguments = sys.argv
 current_pid = os.getpid()
 if len(arguments) > 2:
@@ -53,27 +50,23 @@ def split_into_sentences(text):
     return nltk.sent_tokenize(text)
 
 # Function to flag posts based on content analysis with a confidence threshold
-def flagposts(transcript_text, confidence_threshold=0.5):
+def flagposts(sentences, confidence_threshold=0.5):
     flagged_possible, flagged_certain = [], []
     
-    # Split the transcript into sentences
-    sentences = split_into_sentences(transcript_text)
     
     for sentence in sentences:
         result = q_predict(sentence, q_table, vectorizer)
-        
+        '''
         # Ensure the confidence is a float or handle it as needed
         try:
             confidence = float(result.get('confidence', 0))  # Default to 0 if no confidence value
         except ValueError:
             confidence = 0  # Default to 0 if there's an issue converting to float
-
-        # Flagging based on confidence threshold
-        if confidence >= confidence_threshold:
-            if result['top_class'] == 'strongly inappropriate':
-                flagged_certain.append(sentence)
-            elif result['top_class'] != 'neutral':  # Allowing some leeway for "offensive" content
-                flagged_possible.append(sentence)
+        '''
+        if result['top_class'] == 'strongly inappropriate':
+            flagged_certain.append(sentence)
+        elif result['top_class'] != 'neutral':  # Allowing some leeway for "offensive" content
+            flagged_possible.append(sentence)
 
     return flagged_possible, flagged_certain
 
@@ -88,29 +81,30 @@ def main():
     print("Evaluating Transcript")
     # Combine all transcript text into a single string
     transcript_text = " ".join(entry["text"] for entry in transcript_list)
-
+    # Split the transcript into sentences
+    sentences = split_into_sentences(transcript_text)
+    
     # Flag posts based on the transcript sentences
-    flagged_possible, flagged_certain = flagposts(transcript_text)
+    flagged_possible, flagged_certain = flagposts(sentences)
 
     # Writing results to a response file
     with open(f"response-{current_pid}", "w") as file:
         responselength = 1000
         if len(flagged_certain) >= 5:
             i = 1
-            file.write("Here are some concerning posts we found!")
+            file.write("Here are some concerning phrases we found!")
             while(i <= 5):
-                file.write(f"Post{i}\n")
+                file.write(f"Phrase{i}\n")
                 file.write(f"{flagged_certain[i][:responselength]}\n")
                 i += 1
-
         elif len(flagged_certain) > 0:
             for i, post in enumerate(flagged_certain):
-                file.write(f"Post{i}\n")
+                file.write(f"Phrase{i}\n")
                 file.write(post[:responselength])
-        elif len(flagged_possible) >= 5:
+        elif len(flagged_possible) > 0:
             i = 1
             while(i <= 5):
-                file.write(f"Post{i}\n")
+                file.write(f"Phrase{i}\n")
                 file.write(f"{flagged_possible[i][:responselength]}\n")
                 i += 1
         else:
