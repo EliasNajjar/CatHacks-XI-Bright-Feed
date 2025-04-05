@@ -56,6 +56,7 @@ def flagposts(sentences, confidence_threshold=0.5):
     
     for sentence in sentences:
         result = q_predict(sentence, q_table, vectorizer)
+        print(result)
         '''
         # Ensure the confidence is a float or handle it as needed
         try:
@@ -86,7 +87,7 @@ def main():
     
     # Flag posts based on the transcript sentences
     flagged_possible, flagged_certain = flagposts(sentences)
-
+    
     # Writing results to a response file
     with open(f"response-{current_pid}", "w") as file:
         responselength = 1000
