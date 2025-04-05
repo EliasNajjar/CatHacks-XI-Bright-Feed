@@ -13,6 +13,14 @@ import pandas as pd
 import numpy as np
 from BullyingAdultContentAnalyzer import q_predict,load_q_learning_model
 
+arguments = sys.argv
+if len(arguments) > 2:
+    arg1 = arguments[1]  # Fixed typo
+    arg2 = arguments[2]  # Fixed typo
+
+    print(arg1)
+    print(arg2)
+
 flagged_posts_possible, flagged_posts_certain = [],[]
 flagged_comments_possible, flagged_comments_certain =[],[]
 # All of the functions
@@ -84,12 +92,7 @@ subredname = "learnpython"
 
 q_table, vectorizer = load_q_learning_model()
 
-arg = sys.argv
-if len(arg)>1:
-    subredname = sys.argv[1]
-    checkfor = sys.argv[2]
-    print(subredname)
-    print(checkfor)
+
 
 
 

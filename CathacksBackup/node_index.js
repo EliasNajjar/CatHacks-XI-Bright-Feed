@@ -9,7 +9,8 @@ const fs = require("fs");
 app.use(express.text());
 app.use(express.json());
 
-const PYTHON_FILE = "scrapped/jsnodecommunicationtesting.py";
+//const PYTHON_FILE = "scrapped/jsnodecommunicationtesting.py";
+const PYTHON_FILE = "redditscrapper.py";
 
 const port = parseInt(process.env.PORT) || 3000;
 app.listen(port, () => {
@@ -39,9 +40,11 @@ function runPythonScript(scriptPath, args) { //arguments: url, username, passwor
 
   Process.stdout.on('data', (data) => {
     Session.state = data.toString();
+    console.log(data.toString());
   });
 
   Process.stderr.on('data', (data) => {
+    console.log(`ERROR: ${data}`);
     Session.state = `error: ${data}`;
   });
 
@@ -63,6 +66,7 @@ function closeOutputFile(id) {
       console.error(`Error deleting file: ${err}`);
     }
   });
+  sessions = sessions.filter(session => session.id !== id);
 }
 
 //default response
