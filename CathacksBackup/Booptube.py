@@ -65,6 +65,8 @@ def flagposts(sentences, confidence_threshold=0.5):
         # Flagging based on confidence threshold
         if result['top_class'] == 'strongly inappropriate':
             flagged_certain.append(x)
+        if result['top class'] == 'possibly offensive':
+            flagged_possible.append(x)
         elif result['top_class'] != 'neutral':  # Allowing some leeway for "offensive" content
             flagged_possible.append(x)
 
