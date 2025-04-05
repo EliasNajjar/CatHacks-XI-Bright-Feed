@@ -63,11 +63,10 @@ def flagposts(sentences, confidence_threshold=0.5):
             confidence = 0  # Default to 0 if there's an issue converting to float
 
         # Flagging based on confidence threshold
-        if confidence >= confidence_threshold:
-            if result['top_class'] == 'strongly inappropriate':
-                flagged_certain.append(x)
-            elif result['top_class'] != 'neutral':  # Allowing some leeway for "offensive" content
-                flagged_possible.append(x)
+        if result['top_class'] == 'strongly inappropriate':
+            flagged_certain.append(x)
+        elif result['top_class'] != 'neutral':  # Allowing some leeway for "offensive" content
+            flagged_possible.append(x)
 
     return flagged_possible, flagged_certain
 
@@ -100,7 +99,7 @@ def main():
     print("Evaluating Transcript")
     # Flag posts based on content analysis with a 50% confidence threshold
     flagged_possible, flagged_certain = flagposts(sentences, confidence_threshold=0.5)
-
+    
     # Write the results to a file
     with open(f"response-{current_pid}", "w") as file:
         responselength = 1000
