@@ -5,7 +5,7 @@ const app = express();
 
 app.use(express.text());
 
-const PYTHON_FILE = "jsnodecommunicationtesting.py";
+const PYTHON_FILE = "scrapped/jsnodecommunicationtesting.py";
 
 const port = parseInt(process.env.PORT) || 3000;
 app.listen(port, () => {
@@ -69,9 +69,9 @@ app.get('/state/:id', function (req, res) {
     let session = getSession(ID);
 
     if (session.state.includes('close: 0')) {
-        res.status(200).send("SENDING DATA");
+        res.status(200).send("SENT DATA");
     }
     else{
-        res.status(200).send(session.state);
+        res.status(202).send(session.state);
     }
   })

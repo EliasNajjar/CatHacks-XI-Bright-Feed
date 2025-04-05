@@ -1,8 +1,7 @@
-// const { exec } = import('child_process');
-// const { curly } = import('node-libcurl');
-
+const HOSTNAME = "http://localhost:3000"
 let ID
 let latestResponse = ""
+
 
 async function check() {
   let input = getInput();
@@ -12,13 +11,12 @@ async function check() {
   }
   await postSubreddit();
 
-  while (latestResponse != "SENDING DATA" && !latestResponse.includes("close") && !latestResponse.includes("error")) {
+  do {
     await getLatestResponse();
-    await sleep(100);
-    console.log(latestResponse)
     document.getElementById("AI Output").innerText = latestResponse;
+    await sleep(100);
   }
-    //`AI Output for ${document.getElementById("to check for").value} from ${document.getElementById("input").value} : \n`
+  while (latestResponse != "SENDING DATA" && !latestResponse.includes("close") && !latestResponse.includes("error"))
 };
 
 function getInput() {
@@ -30,7 +28,7 @@ function sleep(ms) {
 }
 
 async function postSubreddit() {
-  const response = await fetch("http://localhost:3000/subreddit", {
+  const response = await fetch(`${HOSTNAME}/subreddit`, {
       method: "POST",
       body: getInput()
   });
@@ -39,7 +37,7 @@ async function postSubreddit() {
 
 
 async function getLatestResponse() {
-  await fetch(`http://localhost:3000/state/${ID}`, {
+  await fetch(`${HOSTNAME}/state/${ID}`, {
       method: "GET",
   }).then(response => {
       return response.text();
