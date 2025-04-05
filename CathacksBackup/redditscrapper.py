@@ -18,13 +18,7 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer
 import torch
 
 #talking to the node
-arguments = sys.argv
-if len(arguments) > 2:
-    arg1 = arguments[1]  # reddit name
-    arg2 = arguments[2]  # what we are looking for
 
-    print(arg1)
-    print(arg2)
 #initialed flagged variables
 flagged_posts_possible, flagged_posts_certain = [],[]
 flagged_comments_possible, flagged_comments_certain =[],[]
@@ -108,13 +102,13 @@ q_table, vectorizer = load_q_learning_model()
 
 #talking to the node
 arguments = sys.argv
-subredname = ""
+subredname = "learnpython"
 if len(arguments) > 2:
     subredname = arguments[1]  # reddit name
     arg2 = arguments[2]  # what we are looking for
 
-    print(arg1)
-    print(arg2)
+    
+arg2 = "AI Generated content"  
 #initialed flagged variables
 
 if validatesubred(subredname) == True:
@@ -139,19 +133,19 @@ if validatesubred(subredname) == True:
             with torch.no_grad():
                 outputs = model(**inputs)
 
-                # Get predictions
-                predictions = torch.argmax(outputs.logits, dim=1)
+            # Get predictions
+            predictions = torch.argmax(outputs.logits, dim=1)
 
-                # Interpret the prediction
-                label_map = {0: "Human-written", 1: "AI-generated"}
-                output = label_map[predictions.item()]
-                if (output == "AI-generated"):
-                    aicheck += 1
-                else:
-                    aicheck -= 1
+            # Interpret the prediction
+            label_map = {0: "Human-written", 1: "AI-generated", 3: "Human-written"}
+            output = label_map[predictions.item()]
+            if (output == "AI-generated"):
+                aicheck += 1
+            else:
+                aicheck -= 1
 
-                if (i > limit):
-                    break
+            if (i > limit):
+                break
         ai_average = aicheck/i
         print("writing the file")
         with open(f"response-{current_pid}", "w",encoding = "utf-8") as file:
