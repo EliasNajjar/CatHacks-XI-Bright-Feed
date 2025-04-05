@@ -20,6 +20,7 @@ function postSubreddit() {
       }).then(response => {
         return response.text();
       }).then(id => {
+        console.log("ID: " + id)
         ID = id;
       })
 }

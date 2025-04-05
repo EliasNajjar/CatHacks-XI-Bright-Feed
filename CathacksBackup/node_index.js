@@ -5,7 +5,7 @@ const app = express();
 
 app.use(express.text());
 
-const PYTHON_FILE = "redditscrapper.py";
+const PYTHON_FILE = "jsnodecommunicationtesting.py";
 
 const port = parseInt(process.env.PORT) || 3000;
 app.listen(port, () => {
@@ -23,10 +23,11 @@ let sessions = [];
 
 function runPythonScript(scriptPath, subReddit) { //arguments: url, username, password
 
-  const Process = spawn('python', [scriptPath, subReddit, process.pid]);
+  const Process = spawn('python', [scriptPath, subReddit]);
 
   const Session = {
     spawn: Process,
+    data: subReddit,
     state: "started",
     id: Process.pid
   }
@@ -34,8 +35,7 @@ function runPythonScript(scriptPath, subReddit) { //arguments: url, username, pa
   sessions.push(Session);
 
   Process.stdout.on('data', (data) => {
-    console.log(data.toString())
-    //Session.state = output;
+    Session.state = data.toString();
   });
 
   Process.stderr.on('data', (data) => {
@@ -82,10 +82,11 @@ app.get('/state/:id', function (req, res) {
     else if (session.state.includes('analyzing')) {
         res.status(202).send("analyzing");
     }
-    else if (session.state.includes('done')) {
-        res.status(200).send("done");
+    else if (session.state.includes('close: 0')) {
+        res.status(200).send("SENDING DATA");
     }
     else{
         res.status(200).send(session.state);
     }
+
   })
