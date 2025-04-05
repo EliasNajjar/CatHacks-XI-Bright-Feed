@@ -102,12 +102,13 @@ q_table, vectorizer = load_q_learning_model()
 
 #talking to the node
 arguments = sys.argv
-subredname = "learnpython"
-if len(arguments) > 2:
+#subredname = "learnpython"
+if len(arguments) > 1:
     subredname = arguments[1]  # reddit name
     arg2 = arguments[2]  # what we are looking for
 
     
+  
 #initialed flagged variables
 
 if validatesubred(subredname) == True:
@@ -118,9 +119,10 @@ if validatesubred(subredname) == True:
         posts = scrapecontent(subredname)
         i = 0
         aicheck = 0
+        aioutputs = []
         print("AI is processing")
-        for input in posts:
-            input_text = input
+        for x in posts:
+            input_text = x
             inputs = tokenizer(  
             input_text,
             return_tensors="pt",
@@ -140,6 +142,7 @@ if validatesubred(subredname) == True:
             output = label_map[predictions.item()]
             if (output == "AI-generated"):
                 aicheck += 1
+                aioutputs.append(x)
             else:
                 aicheck -= 1
 
@@ -150,7 +153,12 @@ if validatesubred(subredname) == True:
         with open(f"response-{current_pid}", "w",encoding = "utf-8") as file:
             if (ai_average > 0.5):
             
-                file.write("We believe there is a considerable amount of AI generated content on the page")
+                file.write("We believe there is a considerable amount of AI generated content on the page\n")
+                file.write("Here are some examples")
+                i=0
+                while(i<2):
+                    file.write(f"Example {i+1} \n\n {aioutputs[i]}\n")
+
             else:
                 file.write("We believe there is not a considerable amount of AI generated content on the page")
     else:
