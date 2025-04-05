@@ -9,8 +9,8 @@ const fs = require("fs");
 app.use(express.text());
 app.use(express.json());
 
-const REDDIT_FILE = "scrapped/test.py";
-const YOUTUBE_FILE = "scrapped/test.py";
+const REDDIT_FILE = "redditscrapper.py";
+const YOUTUBE_FILE = "Booptube.py";
 
 const port = parseInt(process.env.PORT) || 3000;
 app.listen(port, () => {
@@ -78,7 +78,7 @@ app.get('/', (req, res) => {
 app.post('/post', function (req, res) {
   let site = req.body.site;
   let id = -1
-    if (isValidURL(site)) {
+    if (site.includes("youtube.com") || site.includes("youtu.be")) {
       id = createPythonProcess(YOUTUBE_FILE, req.body);
       console.log("YOUTUBE")
     } else {
