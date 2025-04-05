@@ -27,7 +27,6 @@ function runPythonScript(scriptPath, subReddit) { //arguments: url, username, pa
 
   const Session = {
     spawn: Process,
-    data: subReddit,
     state: "started",
     id: Process.pid
   }
@@ -60,11 +59,7 @@ app.get('/', (req, res) => {
 
 
 app.post('/subreddit', function (req, res) {
-    console.log("URL Received!")
-  
     let id = runPythonScript(PYTHON_FILE, req.body);
-
-    console.log(`Session id: ${id}`);
 
     res.send(id.toString());
 })
@@ -73,20 +68,10 @@ app.get('/state/:id', function (req, res) {
     let ID = parseInt(req.params.id)
     let session = getSession(ID);
 
-    if (session.state.includes('started')) {
-        res.status(202).send("started");
-    }
-    else if (session.state.includes('scraping')) {
-        res.status(202).send("scraping");
-    }
-    else if (session.state.includes('analyzing')) {
-        res.status(202).send("analyzing");
-    }
-    else if (session.state.includes('close: 0')) {
+    if (session.state.includes('close: 0')) {
         res.status(200).send("SENDING DATA");
     }
     else{
         res.status(200).send(session.state);
     }
-
   })

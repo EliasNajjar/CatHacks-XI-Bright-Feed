@@ -2,33 +2,49 @@
 // const { curly } = import('node-libcurl');
 
 let ID
+let latestResponse = ""
 
-function show_output() {
-    document.getElementById("AI Output").innerText = "AI Output for " + document.getElementById("to check for").value + " from " + document.getElementById("input").value ;
+async function check() {
+  let input = getInput();
+  if (!input || input == "") {
+    document.getElementById("AI Output").innerText = "Valid Input Required";
+    return;
+  }
+  await postSubreddit();
+
+  while (latestResponse != "SENDING DATA" && !latestResponse.includes("close") && !latestResponse.includes("error")) {
+    await getLatestResponse();
+    await sleep(100);
+    console.log(latestResponse)
+    document.getElementById("AI Output").innerText = latestResponse;
+  }
+    //`AI Output for ${document.getElementById("to check for").value} from ${document.getElementById("input").value} : \n`
 };
 
 function getInput() {
     return document.getElementById("input").value;
 }
 
-
-function postSubreddit() {
-    console.log("post")
-    fetch("http://localhost:3000/subreddit", {
-        method: "POST",
-        body: getInput(),
-      }).then(response => {
-        return response.text();
-      }).then(id => {
-        console.log("ID: " + id)
-        ID = id;
-      })
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms)); // Helper function to add a delay
 }
 
-function getState() {
-    fetch(`http://localhost:3000/state/${ID}`, {
-        method: "GET",
-      }).then(response => {
-        console.log(response.text())
-      })
+async function postSubreddit() {
+  const response = await fetch("http://localhost:3000/subreddit", {
+      method: "POST",
+      body: getInput()
+  });
+  ID = await response.text();
+}
+
+
+async function getLatestResponse() {
+  await fetch(`http://localhost:3000/state/${ID}`, {
+      method: "GET",
+  }).then(response => {
+      return response.text();
+  }).then(text => {
+      latestResponse = text;
+      return text;
+  });
 }
