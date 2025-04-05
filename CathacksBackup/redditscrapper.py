@@ -7,7 +7,6 @@ import praw
 import subprocess
 import sys
 import os
-import os
 import joblib
 import pandas as pd
 import numpy as np
