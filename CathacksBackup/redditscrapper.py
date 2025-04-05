@@ -108,11 +108,10 @@ if len(arguments) > 2:
     arg2 = arguments[2]  # what we are looking for
 
     
-arg2 = "AI Generated content"  
 #initialed flagged variables
 
 if validatesubred(subredname) == True:
-    if (arg2 == "AI Generated content"):
+    if (arg2 == "AI Generated Content"):
         model_name = "Juner/AI-generated-text-detection-pair"
         model = AutoModelForSequenceClassification.from_pretrained(model_name)
         tokenizer = AutoTokenizer.from_pretrained(model_name)
