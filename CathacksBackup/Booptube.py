@@ -76,7 +76,7 @@ q_table, vectorizer = load_q_learning_model()
 def main():
     url = arg1
     video_id = get_video_id(url)
-   
+    video_id = str(video_id)
     from youtube_transcript_api import YouTubeTranscriptApi
     transcript_list = YouTubeTranscriptApi.get_transcript(video_id)    
     print("Evaluating Transcript")
