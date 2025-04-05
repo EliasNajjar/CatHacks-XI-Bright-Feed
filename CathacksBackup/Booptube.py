@@ -39,7 +39,7 @@ def flagposts(transcript_text):
 q_table, vectorizer = load_q_learning_model()
  
 def main():
-    url = input("\n➡ Enter YouTube URL, then press Enter: ").strip()
+    url = input("\nEnter YouTube URL, then press Enter: ").strip()
     video_id = get_video_id(url)
 
     from youtube_transcript_api import YouTubeTranscriptApi
