@@ -5,7 +5,7 @@ const app = express();
 
 app.use(express.text());
 
-const PYTHON_FILE = "index.py";
+const PYTHON_FILE = "redditscrapper.py";
 
 const port = parseInt(process.env.PORT) || 3000;
 app.listen(port, () => {
@@ -34,8 +34,8 @@ function runPythonScript(scriptPath, subReddit) { //arguments: url, username, pa
   sessions.push(Session);
 
   Process.stdout.on('data', (data) => {
-    let output = data.toString()
-    Session.state = output;
+    console.log(data.toString())
+    //Session.state = output;
   });
 
   Process.stderr.on('data', (data) => {
@@ -43,7 +43,7 @@ function runPythonScript(scriptPath, subReddit) { //arguments: url, username, pa
   });
 
   Process.on('close', (code) => {
-    Session.state = `error: ${code}`;
+    Session.state = `close: ${code}`;
   });
 
   return Process.pid;

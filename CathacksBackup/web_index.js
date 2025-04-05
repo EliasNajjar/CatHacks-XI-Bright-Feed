@@ -4,7 +4,7 @@
 let ID
 
 function show_output() {
-    document.getElementById("AI Output").innerText = "AI Output for " + document.getElementById("to check for").value + " from " + document.getElementById("URL").value;
+    document.getElementById("AI Output").innerText = "AI Output for " + document.getElementById("to check for").value + " from " + document.getElementById("input").value ;
 };
 
 function getInput() {

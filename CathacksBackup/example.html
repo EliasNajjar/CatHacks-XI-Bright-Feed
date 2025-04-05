@@ -9,7 +9,7 @@
   <h1>Enter a URL to check</h1>
 
   <label>Website URL:</label>
-  <input type="text" id="URL"><br>
+  <input type="text" id="input"><br>
   <label>Check for</label>
   <select id="to check for">
     <option value="AI Generated Content">AI Generated Content</option>
@@ -18,7 +18,8 @@
     <option value="Self Harm">Self Harm</option>
   </select><br>
   <button onclick="show_output()">Check</button>
-  <button onclick="post()">Post</button>
+  <button onclick="postSubreddit()">Post</button>
+  <button onclick="getState()">Get State</button>
   <p style="font-size:18px" id="AI Output"></p>
     <script src="web_index.js">
 
