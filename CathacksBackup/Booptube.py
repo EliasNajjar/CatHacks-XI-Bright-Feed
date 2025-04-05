@@ -55,9 +55,12 @@ def flagposts(transcript_text, confidence_threshold=0.5):
     for x in transcript_text:
         result = q_predict(x, q_table, vectorizer)
         
-        # Get the prediction confidence level
-        confidence = result['confidence']
-        
+        # Ensure the confidence is a float or handle it as needed
+        try:
+            confidence = float(result.get('confidence', 0))  # Default to 0 if no confidence value
+        except ValueError:
+            confidence = 0  # Default to 0 if there's an issue converting to float
+
         # Flagging based on confidence threshold
         if confidence >= confidence_threshold:
             if result['top_class'] == 'strongly inappropriate':
