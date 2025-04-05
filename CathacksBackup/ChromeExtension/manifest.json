@@ -2,18 +2,10 @@
     "manifest_version": 3,
     "name": "Text Analyzer",
     "version": "1.0",
-    "description": "Integrates CatHacks-Goated-Team-2.0 functionalities into Chrome.",
-    "permissions": ["activeTab", "storage"],
-    "background": {
-      "service_worker": "background.js"
-    },
+    "description": "Analyzes subreddit text and retrieves AI results.",
     "action": {
       "default_popup": "popup.html",
-      "default_icon": {
-        "16": "icons/icon16.png",
-        "48": "icons/icon48.png",
-        "128": "icons/icon128.png"
-      }
-    }
-  }
-  
+      "default_icon": "icons/icon.png"
+    },
+    "permissions": ["activeTab"]
+  }  
