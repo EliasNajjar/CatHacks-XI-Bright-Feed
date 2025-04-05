@@ -17,7 +17,7 @@ class QLearningTextClassifier:
         self.vectorizer = None
 
     def load_data(self):
-        url = 'https://raw.githubusercontent.com/EliasNajjar/CatHacks-Goated-Team-2.0/main/CathacksBackup/labeled_data.csv'
+        url = 'https://raw.githubusercontent.com/EliasNajjar/CatHacks-Goated-Team-2.0/main/CathacksBackup/data/labeled_data.csv'
         df = pd.read_csv(url)
         df = df[['tweet', 'class']].dropna()
         return train_test_split(df['tweet'], df['class'], test_size=0.2, random_state=42)
