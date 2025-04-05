@@ -48,16 +48,23 @@ def get_video_id(url):
             return parsed_url.path.split('/')[2]
     return None
 
-# Function to flag posts based on content analysis
-def flagposts(transcript_text):
+# Function to flag posts based on content analysis with a confidence threshold
+def flagposts(transcript_text, confidence_threshold=0.5):
     flagged_possible, flagged_certain = [], []
+    
     for x in transcript_text:
         result = q_predict(x, q_table, vectorizer)
-        if result['top_class'] != 'neutral':
+        
+        # Get the prediction confidence level
+        confidence = result['confidence']
+        
+        # Flagging based on confidence threshold
+        if confidence >= confidence_threshold:
             if result['top_class'] == 'strongly inappropriate':
                 flagged_certain.append(x)
-            else:
-                flagged_possible.append(x)   
+            elif result['top_class'] != 'neutral':  # Allowing some leeway for "offensive" content
+                flagged_possible.append(x)
+
     return flagged_possible, flagged_certain
 
 # Load the Q-learning model
@@ -85,30 +92,30 @@ def main():
     # Clean and split the transcript into sentences
     sentences = clean_and_split_into_sentences(transcript_text)
 
-    # Flag posts based on content analysis
-    flagged_possible, flagged_certain = flagposts(sentences)
+    # Flag posts based on content analysis with a 50% confidence threshold
+    flagged_possible, flagged_certain = flagposts(sentences, confidence_threshold=0.5)
 
     # Write the results to a file
     with open(f"response-{current_pid}", "w") as file:
         responselength = 1000
         if len(flagged_certain) >= 5:
             i = 0
-            file.write("Here are some concerning posts we found!\n")
+            file.write("Here are some concerning phrases we found!\n")
             while i < 5 and i < len(flagged_certain):
-                file.write(f"Post {i+1}:\n")
+                file.write(f"Phrase {i+1}:\n")
                 file.write(f"{flagged_certain[i][:responselength]}\n")
                 i += 1
 
         elif len(flagged_certain) > 0:
             for i, post in enumerate(flagged_certain):
-                file.write(f"Post {i+1}:\n")
+                file.write(f"Phrase {i+1}:\n")
                 file.write(post[:responselength])
 
         elif len(flagged_possible) >= 5:
             i = 0
-            file.write("Here are some posts that could be concerning:\n")
+            file.write("Here are some phrases that could be concerning:\n")
             while i < 5 and i < len(flagged_possible):
-                file.write(f"Post {i+1}:\n")
+                file.write(f"Phrase {i+1}:\n")
                 file.write(f"{flagged_possible[i][:responselength]}\n")
                 i += 1
         else:
