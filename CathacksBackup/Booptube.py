@@ -6,6 +6,24 @@ import numpy as np
 from urllib.parse import urlparse, parse_qs
 from BullyingAdultContentAnalyzer import q_predict,load_q_learning_model
 
+arguments = sys.argv
+current_pid = os.getpid()
+if len(arguments) > 2:
+    arg1 = arguments[1]  # Fixed typo
+    arg2 = arguments[2]  # Fixed typo
+
+    print(arg1)
+    print(arg2)
+
+    with open(f"response-{current_pid}", "w") as file:
+        file.write("Hello, world!\n")
+        file.write("Video URL: " + arg1 + "\n")
+        file.write("Check For: " + arg2 + "\n")
+        file.write(f"ID: {current_pid}" + "\n")
+else:
+    print("Insufficient arguments provided. Please pass two arguments.")
+    sys.exit(1)
+
 def get_video_id(url):
     """
     Extract the video ID from a YouTube URL.
@@ -39,15 +57,13 @@ def flagposts(transcript_text):
 q_table, vectorizer = load_q_learning_model()
  
 def main():
-    url = input("\nEnter YouTube URL, then press Enter: ").strip()
+    url = arg1
     video_id = get_video_id(url)
 
     from youtube_transcript_api import YouTubeTranscriptApi
     transcript_list = YouTubeTranscriptApi.get_transcript(video_id)    
     transcript_text = " ".join(entry["text"] for entry in transcript_list)
 
-    # Load trained Q-table and vectorizer
-    current_pid = os.getpid()
     flagged_possible, flagged_certain = flagposts(transcript_text)
 
     with open(f"response-{current_pid}", "w") as file:
