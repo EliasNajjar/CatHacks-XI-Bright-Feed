@@ -43,7 +43,7 @@ function createPythonProcess(scriptPath, args) { //arguments: url, username, pas
 
   Process.stderr.on('data', (data) => {
     console.log(`ERROR: ${data}`);
-    Session.state = `error: ${data}`;
+    Session.state = "An Error Occurred";
   });
 
   Process.on('close', (code) => {
