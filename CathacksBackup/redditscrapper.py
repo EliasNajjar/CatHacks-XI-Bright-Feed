@@ -158,7 +158,7 @@ if validatesubred(subredname) == True:
                 i=0
                 while(i<2):
                     file.write(f"Example {i+1} \n\n {aioutputs[i]}\n")
-
+                    i += 1
             else:
                 file.write("We believe there is not a considerable amount of AI generated content on the page")
     else:
