@@ -1,116 +1,86 @@
 import os
-import joblib
-import pandas as pd
+import pickle
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
 
+# Load the trained Q-learning model and vectorizer from file
+def load_q_learning_model(filepath="q_learning_model.pkl"):
+    with open(filepath, "rb") as f:
+        model = pickle.load(f)
+    return model["q_table"], model["vectorizer"]
 
-class TextClassifier:
-    def __init__(self):
-        base_dir = os.path.join(os.path.dirname(__file__), 'data')
-        self.model_path = os.path.join(base_dir, 'model.joblib')
-        self.vec_path = os.path.join(base_dir, 'preprocess.joblib')
+# Class label mapping (for readability in output)
+mapping = {
+    0: 'strongly inappropriate',
+    1: 'possibly offensive',
+    2: 'neutral'
+}
 
-        self.estimator = joblib.load(self.model_path)
-        self.preprocessor = joblib.load(self.vec_path)
-        self.mapping = {0: 'hate_speech', 1: 'offensive_language', 2: 'neither'}
+# Make a prediction using the Q-table and vectorizer
+def q_predict(text, q_table, vectorizer, threshold=0.2):
+    # Vectorize the input text
+    vec = vectorizer.transform([text]).toarray()
 
-    def predict(self, text: str) -> dict:
-        assert isinstance(text, str), "Input must be a string."
+    # Compare input to existing vocabulary to find closest vector
+    train_vectors = vectorizer.transform(vectorizer.get_feature_names_out()).toarray()
+    closest_idx = np.argmin(np.linalg.norm(vec - train_vectors, axis=1))
 
-        vector = self.preprocessor.transform([text])
-        proba = self.estimator.predict_proba(vector)[0]
+    # Retrieve Q-values for this closest state
+    q_values = q_table[closest_idx]
 
-        return {
-            'text': text,
-            'top_class': self.mapping[np.argmax(proba)],
-            'classes': [
-                {'class_name': self.mapping[i], 'confidence': float(proba[i])}
-                for i in range(len(proba))
-            ]
-        }
+    # Calculate confidence margin between top and second-best prediction
+    confidence_margin = np.max(q_values) - np.partition(q_values, -2)[-2]
 
-    def get_weights(self, text: str) -> dict:
-        class_idx = np.argmax(self.estimator.predict_proba(self.preprocessor.transform([text]))[0])
-        features = self.preprocessor.get_feature_names_out()
-        weights = self.estimator.coef_[class_idx]
-        word2weight = dict(zip(features, weights))
-        analyzer = self.preprocessor.build_analyzer()
-        tokens = analyzer(text)
+    # Apply threshold logic: if confidence too low, default to 'neutral'
+    if confidence_margin < threshold:
+        action = 2  # neutral
+        confidence = "low"
+    else:
+        action = np.argmax(q_values)
+        confidence = "high"
 
-        return {token: word2weight.get(token, 0.0) for token in tokens}
+    # Return detailed prediction info
+    return {
+        "text": text,
+        "top_class": mapping[action],
+        "confidence": confidence,
+        "margin": confidence_margin,
+        "q_values": {mapping[i]: float(q) for i, q in enumerate(q_values)}
+    }
 
-    def predict_large_text(self, file_path: str) -> None:
-        """Read and classify an entire text file without chunking."""
-        try:
-            try:
-                with open(file_path, 'r', encoding='utf-8') as file:
-                    text = file.read()
-            except UnicodeDecodeError:
-                with open(file_path, 'r', encoding='ISO-8859-1') as file:
-                    text = file.read()
-        except Exception as e:
-            print(f"Error reading the file: {e}")
-            return
+# Console-based user interface
+if __name__ == "__main__":
+    # Check for saved model
+    if not os.path.exists("q_learning_model.pkl"):
+        print("⚠️ Trained model not found. Please train the model first.")
+        exit()
 
-        print(f"\n✅ File read successfully. Text length: {len(text)} characters.\n")
+    # Load trained Q-table and vectorizer
+    q_table, vectorizer = load_q_learning_model()
 
-        result = self.predict(text)
-        weights = self.get_weights(text)
+    print("\n🤖 Type something to classify or enter a file path (.txt). Type 'exit' to quit:")
 
-        print(f"📊 Prediction: {result['top_class']}")
-        for cls in result['classes']:
-            print(f"  - {cls['class_name']}: {cls['confidence']:.4f}")
+    while True:
+        user_input = input(">> ").strip()
 
-def train_and_save_model():
-    print("🔁 Downloading and training...")
-    url = 'https://raw.githubusercontent.com/EliasNajjar/CatHacks-Goated-Team-2.0/main/CathacksBackup/data/labeled_data.csv'
-    df = pd.read_csv(url)
-    df = df[['tweet', 'class']].dropna()
+        # Exit condition
+        if user_input.lower() in ['exit', 'quit']:
+            break
 
-    texts = df['tweet'].astype(str).tolist()
-    labels = df['class'].tolist()
+        # If input is a path to a .txt file, read and classify its contents
+        if os.path.isfile(user_input) and user_input.lower().endswith(".txt"):
+            with open(user_input, "r", encoding="utf-8") as f:
+                content = f.read()
+            result = q_predict(content, q_table, vectorizer)
+        else:
+            # Otherwise, treat the input as text
+            result = q_predict(user_input, q_table, vectorizer)
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        texts, labels, test_size=0.2, random_state=42)
+        # Show prediction and confidence information
+        print(f"\n📊 Prediction: {result['top_class']} (Confidence: {result['confidence']} | Margin: {result['margin']:.4f})")
 
-    vectorizer = TfidfVectorizer(stop_words='english')
-    X_train_vec = vectorizer.fit_transform(X_train)
-    classifier = LogisticRegression(max_iter=1000)
-    classifier.fit(X_train_vec, y_train)
+        # Show Q-values for all classes for transparency
+        for cls, val in result["q_values"].items():
+            print(f"  - {cls}: {val:.4f}")
 
-    os.makedirs("data", exist_ok=True)
-    joblib.dump(classifier, "data/model.joblib")
-    joblib.dump(vectorizer, "data/preprocess.joblib")
-    print("✅ Model and vectorizer saved to ./data")
-
-#Console implementation below
-
-# if __name__ == "__main__":
-#     if not os.path.exists("data/model.joblib"):
-#         train_and_save_model()
-
-#     clf = TextClassifier()
-
-#     print("\n🤖 Type something to classify or enter a file path (.txt). Type 'exit' to quit:")
-#     while True:
-#         user_input = input(">> ").strip()
-#         if user_input.lower() in ['exit', 'quit']:
-#             break
-
-#         if os.path.isfile(user_input):
-#             clf.predict_large_text(user_input)
-#         else:
-#             result = clf.predict(user_input)
-#             weights = clf.get_weights(user_input)
-
-#             print(f"\n📊 Prediction: {result['top_class']}")
-#             for cls in result['classes']:
-#                 print(f"  - {cls['class_name']}: {cls['confidence']:.4f}")
-
-#             print("\n🧠 Word weights (influence):")
-#             for word, weight in weights.items():
-#                 print(f"  {word}: {weight:.4f}")
-#             print("\n---")
+        print("\n---")
