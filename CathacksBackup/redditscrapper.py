@@ -2,7 +2,7 @@
 This will be the file tha scrapes reddit and takes
 '''
 
-import ollama
+
 import praw
 import subprocess
 import sys
@@ -13,7 +13,8 @@ import pandas as pd
 import numpy as np
 from BullyingAdultContentAnalyzer import q_predict,load_q_learning_model
 
-
+flagged_posts_possible, flagged_posts_certain = [],[]
+flagged_comments_possible, flagged_comments_certain =[],[]
 # All of the functions
 def scrapecomments(subredname):
     scrapedcomments = []
@@ -83,16 +84,26 @@ subredname = "learnpython"
 
 q_table, vectorizer = load_q_learning_model()
 
-comments = scrapecomments(subredname)
-posts = scrapecontent(subredname)
-flagged_posts_possible, flagged_posts_certain = [],[]
-flagged_comments_possible, flagged_comments_certain =[],[]
-#functions to filter our posts and shit
+arg = sys.argv
+if len(arg)>1:
+    subredname = sys.argv[1]
+    checkfor = sys.argv[2]
+    print(subredname)
+    print(checkfor)
 
-posts = scrapecontent(subredname)
-comments = scrapecontent(subredname)
-flagged_posts_possible, flagged_posts_certain = flagposts(posts)
-flagged_comments_possible, flagged_comments_certain = flagcomments(comments)
+
+
+# #scrape website content
+# comments = scrapecomments(subredname)
+# posts = scrapecontent(subredname)
+# flagged_posts_possible, flagged_posts_certain = [],[]
+# flagged_comments_possible, flagged_comments_certain =[],[]
+# #functions to filter our posts and shit
+
+# posts = scrapecontent(subredname)
+# comments = scrapecontent(subredname)
+# flagged_posts_possible, flagged_posts_certain = flagposts(posts)
+# flagged_comments_possible, flagged_comments_certain = flagcomments(comments)
 
 
 
