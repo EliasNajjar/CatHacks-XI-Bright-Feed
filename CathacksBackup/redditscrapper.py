@@ -154,7 +154,7 @@ if validatesubred(subredname) == True:
             if (ai_average > 0.5):
             
                 file.write("We believe there is a considerable amount of AI generated content on the page\n")
-                file.write("Here are some examples")
+                file.write("\nHere are some examples")
                 i=0
                 while(i<2):
                     file.write(f"Example {i+1} \n\n {aioutputs[i]}\n")
@@ -214,6 +214,9 @@ if validatesubred(subredname) == True:
                 file.write(comment[:commentlength])
                 if (i>3):
                     break
+else:
+    with open(f"response-{current_pid}", "w",encoding = "utf-8") as file:
+        file.write("Invalid Subreddit!")
 
 
 
