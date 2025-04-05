@@ -33,8 +33,45 @@
         </div>
 
         <p id="AI Output"></p>
+
+        <div class="password-section">
+            <h2>Password Verification</h2>
+            <form id="passwordForm">
+                <label for="password">Enter Password:</label>
+                <input type="password" id="password" name="password" required>
+                <input type="submit" value="Verify Password">
+            </form>
+
+            <div id="passwordMessage" class="message"></div>
+        </div>
+        
     </div>
 
+    <script>
+        // Predefined password for verification
+        const predefinedPassword = "secret123"; // Predefined password
+
+        // Function to handle password form submission
+        document.getElementById("passwordForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevents the form from refreshing the page
+
+            const userPassword = document.getElementById("password").value;
+            const messageDiv = document.getElementById("passwordMessage");
+
+            // Check if the password matches
+            if (userPassword === predefinedPassword) {
+                messageDiv.style.color = "green";
+                messageDiv.textContent = "Access Granted!";
+            } else {
+                messageDiv.style.color = "red";
+                messageDiv.textContent = "Incorrect Password. Please try again.";
+            }
+
+            // Clear the password input field
+            document.getElementById("password").value = "";
+        });
+    </script>
+    
     <script src="web_index.js"></script>
 </body>
 </html>
