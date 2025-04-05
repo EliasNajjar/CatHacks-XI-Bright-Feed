@@ -2,7 +2,7 @@
 // const { curly } = import('node-libcurl');
 
 let ID
-let latestResponse
+let latestResponse = ""
 
 async function check() {
   let input = getInput();
@@ -12,9 +12,9 @@ async function check() {
   }
   await postSubreddit();
 
-  while (latestResponse != "SENDING DATA") {
+  while (latestResponse != "SENDING DATA" && !latestResponse.includes("close") && !latestResponse.includes("error")) {
     await getLatestResponse();
-    await sleep(15);
+    await sleep(100);
     console.log(latestResponse)
     document.getElementById("AI Output").innerText = latestResponse;
   }
