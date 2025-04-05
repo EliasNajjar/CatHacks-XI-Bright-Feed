@@ -5,8 +5,9 @@ pandas
 numpy
 torch
 transformers
+scikit-learn
 praw
 joblib
-scikit-learn
+nltk
 
 In the cloned folder, open CathacksBackup->FrontEnd and run intro.html
