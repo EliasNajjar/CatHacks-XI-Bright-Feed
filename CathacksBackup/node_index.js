@@ -9,8 +9,8 @@ const fs = require("fs");
 app.use(express.text());
 app.use(express.json());
 
-const PYTHON_FILE = "scrapped/jsnodecommunicationtesting.py";
-//const PYTHON_FILE = "redditscrapper.py";
+const REDDIT_FILE = "scrapped/test.py";
+const YOUTUBE_FILE = "scrapped/test.py";
 
 const port = parseInt(process.env.PORT) || 3000;
 app.listen(port, () => {
@@ -26,9 +26,9 @@ app.use(cors({
 
 let sessions = [];
 
-function runPythonScript(scriptPath, args) { //arguments: url, username, password
+function createPythonProcess(scriptPath, args) { //arguments: url, username, password
 
-  const Process = spawn('python', [scriptPath, args.subReddit, args.detectionType]);
+  const Process = spawn('python', [scriptPath, args.site, args.detectionType]);
 
   const Session = {
     spawn: Process,
@@ -75,8 +75,16 @@ app.get('/', (req, res) => {
 });
 
 
-app.post('/subreddit', function (req, res) {
-    let id = runPythonScript(PYTHON_FILE, req.body);
+app.post('/post', function (req, res) {
+  let site = req.body.site;
+  let id = -1
+    if (isValidURL(site)) {
+      id = createPythonProcess(YOUTUBE_FILE, req.body);
+      console.log("YOUTUBE")
+    } else {
+      id = createPythonProcess(REDDIT_FILE, req.body);
+      console.log("REDDIT")
+    }
 
     res.send(id.toString());
 })
@@ -100,5 +108,15 @@ app.get('/state/:id', function (req, res) {
         res.status(202).send(session.state);
     }
   })
+
+  function isValidURL(string) {
+    try {
+      new URL(string); // If valid, it does not throw
+      return true;     // Returns true for a valid URL
+    } catch (error) {
+      return false;    // Returns false for an invalid URL
+    }
+  }
+  
 
  
