@@ -68,20 +68,10 @@ app.get('/state/:id', function (req, res) {
     let ID = parseInt(req.params.id)
     let session = getSession(ID);
 
-    if (session.state.includes('started')) {
-        res.status(202).send("started");
-    }
-    else if (session.state.includes('scraping')) {
-        res.status(202).send("scraping");
-    }
-    else if (session.state.includes('analyzing')) {
-        res.status(202).send("analyzing");
-    }
-    else if (session.state.includes('close: 0')) {
+    if (session.state.includes('close: 0')) {
         res.status(200).send("SENDING DATA");
     }
     else{
         res.status(200).send(session.state);
     }
-
   })
