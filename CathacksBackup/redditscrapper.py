@@ -73,7 +73,7 @@ def validatesubred(subreddit):
     try:
         subred = reddit.subreddit(subreddit)
         subred.id
-        print("validated")
+        print("Validated")
         return True
     except (NOT_FOUND, Forbidden, Redirect) as e:
         return False
@@ -120,7 +120,7 @@ if validatesubred(subredname) == True:
         i = 0
         aicheck = 0
         aioutputs = []
-        print("AI is processing")
+        print("AI is processing...")
         for x in posts:
             input_text = x
             inputs = tokenizer(  
@@ -149,7 +149,7 @@ if validatesubred(subredname) == True:
             if (i > limit):
                 break
         ai_average = aicheck/i
-        print("writing the file")
+        print("Writing the file...")
         with open(f"response-{current_pid}", "w",encoding = "utf-8") as file:
             if (ai_average > 0.5):
             
@@ -162,7 +162,7 @@ if validatesubred(subredname) == True:
             else:
                 file.write("We believe there is not a considerable amount of AI generated content on the page")
     else:
-        print("Scrapping Content")
+        print("Scraping Web Content...")
         #scrape website content
         comments = scrapecomments(subredname)
         posts = scrapecontent(subredname)

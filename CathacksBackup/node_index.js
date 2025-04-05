@@ -28,15 +28,13 @@ let sessions = [];
 
 function createPythonProcess(scriptPath, args) { //arguments: url, username, password
 
-  const Process = spawn('python', [scriptPath, args.site, args.detectionType]);
+  const Process = spawn('python', ['-u',scriptPath, args.site, args.detectionType]);
 
   const Session = {
     spawn: Process,
     state: "started",
     id: Process.pid
   }
-
-  sessions.push(Session);
 
   Process.stdout.on('data', (data) => {
     Session.state = data.toString();
@@ -51,6 +49,8 @@ function createPythonProcess(scriptPath, args) { //arguments: url, username, pas
   Process.on('close', (code) => {
     Session.state = `close: ${code}`;
   });
+
+  sessions.push(Session);
 
   return Process.pid;
 }
@@ -80,10 +80,8 @@ app.post('/post', function (req, res) {
   let id = -1
     if (site.includes("youtube.com") || site.includes("youtu.be")) {
       id = createPythonProcess(YOUTUBE_FILE, req.body);
-      console.log("YOUTUBE")
     } else {
       id = createPythonProcess(REDDIT_FILE, req.body);
-      console.log("REDDIT")
     }
 
     res.send(id.toString());
@@ -108,15 +106,6 @@ app.get('/state/:id', function (req, res) {
         res.status(202).send(session.state);
     }
   })
-
-  function isValidURL(string) {
-    try {
-      new URL(string); // If valid, it does not throw
-      return true;     // Returns true for a valid URL
-    } catch (error) {
-      return false;    // Returns false for an invalid URL
-    }
-  }
   
 
  

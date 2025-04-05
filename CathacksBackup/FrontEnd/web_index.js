@@ -62,26 +62,23 @@ async function startSession() {
 
 
 async function getLatestResponse() {
-  await fetch(`${HOSTNAME}/state/${ID}`, {
-      method: "GET",
-  })    .then(response => {
+  try {
+    const response = await fetch(`${HOSTNAME}/state/${ID}`);
+
     if (response.status === 200) {
-      // If status is 200, return the file as text
+      // Get file content on a 200 status
+      const fileContent = await response.text();
+      latestResponse = fileContent;
       latestResponseFinished = true;
-      return response.text();
+    } else if (response.status === 202) {
+      // Get the state as a string on a 202 status
+      const responseText = await response.text();
+      latestResponse = responseText;
     } else {
-      // Handle non-200 status codes (optional)
-      throw new Error(`Request failed with status ${response.status}`);
+      console.error(`Unexpected status: ${response.status}`);
     }
-  })
-  .then(text => {
-    // Set latestResponse if the status is 200
-    latestResponse = text;
-    return text;
-  })
-  .catch(error => {
-    console.error("Error fetching the latest response:", error);
-  });
+  } catch (error) {
+    console.error("Error fetching state:", error);
+  }
 
 }
-
