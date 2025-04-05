@@ -38,15 +38,15 @@ def get_video_id(url):
     parsed_url = urlparse(url)
     hostname = parsed_url.hostname or ''
     if hostname.endswith('youtu.be'):
-        return parsed_url.path[1:]
+        return str(parsed_url.path[1:])
     elif 'youtube' in hostname:
         if parsed_url.path == '/watch':
             query_params = parse_qs(parsed_url.query)
-            return query_params.get('v', [None])[0]
+            return str(query_params.get('v', [None])[0])
         elif parsed_url.path.startswith('/embed/'):
-            return parsed_url.path.split('/')[2]
+            return str(parsed_url.path.split('/')[2])
         elif parsed_url.path.startswith('/v/'):
-            return parsed_url.path.split('/')[2]
+            return str(parsed_url.path.split('/')[2])
     return None
 
 # Function to flag posts based on content analysis with a confidence threshold
