@@ -161,7 +161,7 @@ if validatesubred(subredname) == True:
             else:
                 file.write("We believe there is not a considerable amount of AI generated content on the page")
     else:
-        print("Scrapping Content")
+        print("Scraping Content")
         #scrape website content
         comments = scrapecomments(subredname)
         posts = scrapecontent(subredname)
