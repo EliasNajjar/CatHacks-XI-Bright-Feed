@@ -37,7 +37,7 @@ class QLearningTextClassifier:
         print("💾 Trained model saved to 'q_learning_model.pkl'")
 
     def load_data(self):
-        df = pd.read_csv("C:/Users/ebrya/OneDrive/Documents/GitHub/CatHacks-Goated-Team-2.0/CathacksBackup/data/labeled_data.csv")
+        df = pd.read_csv("data/labeled_data.csv")
         print(f"✅ Dataset loaded: {df.shape[0]} rows")
 
         df = df[['tweet', 'class']].dropna()
