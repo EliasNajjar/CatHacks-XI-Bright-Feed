@@ -42,10 +42,31 @@ class TextClassifier:
 
         return {token: word2weight.get(token, 0.0) for token in tokens}
 
+    def predict_large_text(self, file_path: str) -> None:
+        """Read and classify an entire text file without chunking."""
+        try:
+            try:
+                with open(file_path, 'r', encoding='utf-8') as file:
+                    text = file.read()
+            except UnicodeDecodeError:
+                with open(file_path, 'r', encoding='ISO-8859-1') as file:
+                    text = file.read()
+        except Exception as e:
+            print(f"Error reading the file: {e}")
+            return
+
+        print(f"\n✅ File read successfully. Text length: {len(text)} characters.\n")
+
+        result = self.predict(text)
+        weights = self.get_weights(text)
+
+        print(f"📊 Prediction: {result['top_class']}")
+        for cls in result['classes']:
+            print(f"  - {cls['class_name']}: {cls['confidence']:.4f}")
 
 def train_and_save_model():
     print("🔁 Downloading and training...")
-    url = 'https://raw.githubusercontent.com/Hironsan/HateSonar/master/data/labeled_data.csv'
+    url = 'https://raw.githubusercontent.com/EliasNajjar/CatHacks-Goated-Team-2.0/main/CathacksBackup/labeled_data.csv'
     df = pd.read_csv(url)
     df = df[['tweet', 'class']].dropna()
 
@@ -72,20 +93,23 @@ if __name__ == "__main__":
 
     clf = TextClassifier()
 
-    print("\n🤖 Type something to classify (or type 'exit' to quit):")
+    print("\n🤖 Type something to classify or enter a file path (.txt). Type 'exit' to quit:")
     while True:
-        user_input = input(">> ")
+        user_input = input(">> ").strip()
         if user_input.lower() in ['exit', 'quit']:
             break
 
-        result = clf.predict(user_input)
-        weights = clf.get_weights(user_input)
+        if os.path.isfile(user_input):
+            clf.predict_large_text(user_input)
+        else:
+            result = clf.predict(user_input)
+            weights = clf.get_weights(user_input)
 
-        print(f"\n📊 Prediction: {result['top_class']}")
-        for cls in result['classes']:
-            print(f"  - {cls['class_name']}: {cls['confidence']:.4f}")
+            print(f"\n📊 Prediction: {result['top_class']}")
+            for cls in result['classes']:
+                print(f"  - {cls['class_name']}: {cls['confidence']:.4f}")
 
-        print("\n🧠 Word weights (influence):")
-        for word, weight in weights.items():
-            print(f"  {word}: {weight:.4f}")
-        print("\n---")
+            print("\n🧠 Word weights (influence):")
+            for word, weight in weights.items():
+                print(f"  {word}: {weight:.4f}")
+            print("\n---")
