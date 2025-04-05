@@ -73,9 +73,8 @@ def validatesubred(subreddit):
     try:
         subred = reddit.subreddit(subreddit)
         subred.id
-        print("validated")
         return True
-    except (NOT_FOUND, Forbidden, Redirect) as e:
+    except Exception as e:  # Catch any exception
         return False
 
 #tesing the model output
