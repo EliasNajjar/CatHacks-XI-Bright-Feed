@@ -18,14 +18,6 @@ if len(arguments) > 2:
     arg1 = arguments[1]
     arg2 = arguments[2]
 
-    print(arg1)
-    print(arg2)
-
-    with open(f"response-{current_pid}", "w") as file:
-        file.write("Hello, world!\n")
-        #file.write("Video URL: " + arg1 + "\n")
-        file.write("Check For: " + arg2 + "\n")
-        file.write(f"ID: {current_pid}" + "\n")
 else:
     print("Insufficient arguments provided. Please pass two arguments.")
     sys.exit(1)
@@ -73,7 +65,7 @@ def main():
         model_name = "Juner/AI-generated-text-detection-pair"
         model = AutoModelForSequenceClassification.from_pretrained(model_name)
         tokenizer = AutoTokenizer.from_pretrained(model_name)
-        print("🧠 AI Detection Model Loaded")
+        print("AI Detection Model Loaded")
 
         transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
         transcript_text = " ".join(entry["text"] for entry in transcript_list)
