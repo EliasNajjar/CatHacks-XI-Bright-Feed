@@ -4,6 +4,15 @@ let latestResponse = ""
 latestResponseFinished = false;
 
 
+document.addEventListener("keydown", function (event) {
+  if (event.key === "Enter") {
+    check();
+    event.preventDefault()
+  }
+});
+
+
+
 async function check() {
   let input = getInput();
   if (!input || input == "") {
@@ -75,3 +84,4 @@ async function getLatestResponse() {
   });
 
 }
+

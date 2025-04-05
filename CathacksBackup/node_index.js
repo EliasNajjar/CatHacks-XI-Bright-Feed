@@ -9,8 +9,8 @@ const fs = require("fs");
 app.use(express.text());
 app.use(express.json());
 
-//const PYTHON_FILE = "scrapped/jsnodecommunicationtesting.py";
-const PYTHON_FILE = "redditscrapper.py";
+const PYTHON_FILE = "scrapped/jsnodecommunicationtesting.py";
+//const PYTHON_FILE = "redditscrapper.py";
 
 const port = parseInt(process.env.PORT) || 3000;
 app.listen(port, () => {
