@@ -3,16 +3,19 @@ This will be the file tha scrapes reddit and takes
 '''
 
 
+from http.client import NOT_FOUND
 import praw
 import subprocess
 import sys
 import os
-import os
 import joblib
 import pandas as pd
 import numpy as np
+from praw.models.reddit.subreddit import Redirect
+from prawcore import Forbidden
 from BullyingAdultContentAnalyzer import q_predict,load_q_learning_model
 
+#talking to the node
 arguments = sys.argv
 if len(arguments) > 2:
     arg1 = arguments[1]  # Fixed typo
@@ -20,7 +23,7 @@ if len(arguments) > 2:
 
     print(arg1)
     print(arg2)
-
+#initialed flagged variables
 flagged_posts_possible, flagged_posts_certain = [],[]
 flagged_comments_possible, flagged_comments_certain =[],[]
 # All of the functions
@@ -70,12 +73,21 @@ def flagcomments(comments):
             flagged_comments_possible.append(x)   
  return flagged_comments_possible, flagged_comments_certain
 
+def validatesubred(subreddit):
+    try:
+        subred = reddit.subreddit(subreddit)
+        subred.id
+        print("validated")
+        return True
+    except (NOT_FOUND, Forbidden, Redirect) as e:
+        
+        return False,
+
 #tesing the model output
 # for posts in posts:
 #     result = q_predict(posts,q_table,vectorizer)
 #     print(f"\n Prediction: {result['top_class']} (Confidence: {result['confidence']} | Margin: {result['margin']:.4f})")
 #     print()
-
 #initializing the reddit api
 client_id = "G0gqyUzguU7lmP3D7JUcvw"
 client_secret = "iSXaeSblUp7uaGgHHxVvWMzfmrhVNg"
@@ -89,24 +101,47 @@ reddit = praw.Reddit(
     )
 subredname = "learnpython"
 
-
+#initialize the model
 q_table, vectorizer = load_q_learning_model()
 
 
+if validatesubred(subredname) == True:
+    #scrape website content
+    comments = scrapecomments(subredname)
+    posts = scrapecontent(subredname)
+    flagged_posts_possible, flagged_posts_certain = [],[]
+    flagged_comments_possible, flagged_comments_certain =[],[]
+    #functions to filter our posts and shit
+    posts = scrapecontent(subredname)
+    comments = scrapecontent(subredname)
+    flagged_posts_possible, flagged_posts_certain = flagposts(posts)
+    flagged_comments_possible, flagged_comments_certain = flagcomments(comments)
+    current_pid = os.getpid()
+    
+    with open(f"response-{current_pid}", "w") as file:
+     responselength = 1000
+     if len(flagged_posts_certain) >= 5:
+        i = 1
+        file.write("Here are some concerning posts we found!")
+        while(i<=5):
+            file.write(f"Post{i}\n")
+            file.write(f"{flagged_posts_certain[i][:responselength]}\n")
+            i += 1
 
+     elif len(flagged_posts_certain) > 0:
+         for i,posts in enumerate(flagged_posts_certain):
+            file.write(f"Post{i}\n")
+            file.write(posts[:responselength])
+     elif len(flagged_posts_possible) >= 5:
+         i = 1
+         while(i<=5):
+            file.write(f"Post{i}\n")
+            file.write(f"{flagged_posts_possible[i][:responselength]}\n")
+            i += 1
+     else:
+         file.write("We found nothing concerning in the subreddit's posts")
 
-
-# #scrape website content
-# comments = scrapecomments(subredname)
-# posts = scrapecontent(subredname)
-# flagged_posts_possible, flagged_posts_certain = [],[]
-# flagged_comments_possible, flagged_comments_certain =[],[]
-# #functions to filter our posts and shit
-
-# posts = scrapecontent(subredname)
-# comments = scrapecontent(subredname)
-# flagged_posts_possible, flagged_posts_certain = flagposts(posts)
-# flagged_comments_possible, flagged_comments_certain = flagcomments(comments)
+    
 
 
 
