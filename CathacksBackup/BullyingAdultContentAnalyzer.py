@@ -86,30 +86,31 @@ def train_and_save_model():
     joblib.dump(vectorizer, "data/preprocess.joblib")
     print("✅ Model and vectorizer saved to ./data")
 
+#Console implementation below
 
-if __name__ == "__main__":
-    if not os.path.exists("data/model.joblib"):
-        train_and_save_model()
+# if __name__ == "__main__":
+#     if not os.path.exists("data/model.joblib"):
+#         train_and_save_model()
 
-    clf = TextClassifier()
+#     clf = TextClassifier()
 
-    print("\n🤖 Type something to classify or enter a file path (.txt). Type 'exit' to quit:")
-    while True:
-        user_input = input(">> ").strip()
-        if user_input.lower() in ['exit', 'quit']:
-            break
+#     print("\n🤖 Type something to classify or enter a file path (.txt). Type 'exit' to quit:")
+#     while True:
+#         user_input = input(">> ").strip()
+#         if user_input.lower() in ['exit', 'quit']:
+#             break
 
-        if os.path.isfile(user_input):
-            clf.predict_large_text(user_input)
-        else:
-            result = clf.predict(user_input)
-            weights = clf.get_weights(user_input)
+#         if os.path.isfile(user_input):
+#             clf.predict_large_text(user_input)
+#         else:
+#             result = clf.predict(user_input)
+#             weights = clf.get_weights(user_input)
 
-            print(f"\n📊 Prediction: {result['top_class']}")
-            for cls in result['classes']:
-                print(f"  - {cls['class_name']}: {cls['confidence']:.4f}")
+#             print(f"\n📊 Prediction: {result['top_class']}")
+#             for cls in result['classes']:
+#                 print(f"  - {cls['class_name']}: {cls['confidence']:.4f}")
 
-            print("\n🧠 Word weights (influence):")
-            for word, weight in weights.items():
-                print(f"  {word}: {weight:.4f}")
-            print("\n---")
+#             print("\n🧠 Word weights (influence):")
+#             for word, weight in weights.items():
+#                 print(f"  {word}: {weight:.4f}")
+#             print("\n---")
