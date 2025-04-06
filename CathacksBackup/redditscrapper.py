@@ -73,8 +73,9 @@ def validatesubred(subreddit):
     try:
         subred = reddit.subreddit(subreddit)
         subred.id
+        print("validated")
         return True
-    except Exception as e:  # Catch any exception
+    except (NOT_FOUND, Forbidden, Redirect) as e:
         return False
 
 #tesing the model output
@@ -83,8 +84,8 @@ def validatesubred(subreddit):
 #     print(f"\n Prediction: {result['top_class']} (Confidence: {result['confidence']} | Margin: {result['margin']:.4f})")
 #     print()
 #initializing the reddit api
-client_id = "G0gqyUzguU7lmP3D7JUcvw"
-client_secret = "iSXaeSblUp7uaGgHHxVvWMzfmrhVNg"
+client_id = "Z9vMfv0-giDLW37BmHA5zA"
+client_secret = "Uclrs5DUhe9prCiBBAztVQk7pHLAEw"
 user_agent = "tesingapi"
 limit = 10
 current_pid = os.getpid()
@@ -119,7 +120,7 @@ if validatesubred(subredname) == True:
         i = 0
         aicheck = 0
         aioutputs = []
-        print("AI is processing...")
+        print("AI is processing")
         for x in posts:
             input_text = x
             inputs = tokenizer(  
@@ -148,20 +149,20 @@ if validatesubred(subredname) == True:
             if (i > limit):
                 break
         ai_average = aicheck/i
-        print("Writing the file...")
+        print("writing the file")
         with open(f"response-{current_pid}", "w",encoding = "utf-8") as file:
             if (ai_average > 0.5):
             
                 file.write("We believe there is a considerable amount of AI generated content on the page\n")
-                file.write("\nHere are some examples\n\n")
+                file.write("\nHere are some examples")
                 i=0
                 while(i<2):
-                    file.write(f"Example {i+1} \n {aioutputs[i]}\n")
+                    file.write(f"Example {i+1} \n\n {aioutputs[i]}\n")
                     i += 1
             else:
                 file.write("We believe there is not a considerable amount of AI generated content on the page")
     else:
-        print("Scraping Content...")
+        print("Scrapping Content")
         #scrape website content
         comments = scrapecomments(subredname)
         posts = scrapecontent(subredname)
